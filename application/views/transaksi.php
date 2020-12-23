@@ -45,6 +45,18 @@
 				$vis  = "";
 				$form_id = "<input type='hidden' id='id_transaksi' name='id' value='$row->id_transaksi'>";              
 			}
+
+      if($mode!="insert"){
+        if($row->kredit==0){
+          $bayar = "debit";
+          $nominal = $row->debit;
+          $admin = $row->admin1;
+        }else{
+          $bayar = "kredit";
+          $nominal = $row->kredit;
+          $admin = $row->admin2;
+        }
+      }
 			?>
 
       <div class="row">
@@ -84,20 +96,20 @@
                       <div class="col-sm-2">
                         <div class="form-check">
                           <label class="form-check-label">
-                            <input type="radio" <?php echo $read2 ?> class="form-check-input" name="bayar" id="membershipRadios1" value="kredit" <?php echo $tampil = ($row!='' AND $row->bayar=='kredit') ? "checked" : "" ; ?>> Kredit </label>
+                            <input type="radio" <?php echo $read2 ?> class="form-check-input" name="bayar" id="membershipRadios1" value="kredit" <?php echo $tampil = ($row!='' AND $bayar=='kredit') ? "checked" : "" ; ?>> Kredit </label>
                         </div>
                       </div>
                       <div class="col-sm-2">
                         <div class="form-check">
                           <label class="form-check-label">
-                            <input type="radio" <?php echo $read2 ?> class="form-check-input" name="bayar" <?php echo $tampil = ($row!='' AND $row->bayar=='debit') ? "checked" : "" ; ?> id="membershipRadios2" value="debit"> Debit </label>
+                            <input type="radio" <?php echo $read2 ?> class="form-check-input" name="bayar" <?php echo $tampil = ($row!='' AND $bayar=='debit') ? "checked" : "" ; ?> id="membershipRadios2" value="debit"> Debit </label>
                         </div>
                       </div>                      
                     </div> 
                     <div class="form-group row">                    
                       <label class="col-sm-2 col-form-label">Nominal</label>
                       <div class="col-sm-2">                        
-                        <input type="text" id="currency-field" data-type="currency" autocomplete="off" <?php echo $read ?> value="<?php echo $tampil = ($row!='') ? $row->nominal : "" ; ?>" name="nominal" placeholder="Nominal" class="form-control" />
+                        <input type="text" id="currency-field" data-type="currency" autocomplete="off" <?php echo $read ?> value="<?php echo $tampil = ($row!='') ? $nominal : "" ; ?>" name="nominal" placeholder="Nominal" class="form-control" />
                       </div>                                          
                       <label class="col-sm-1 col-form-label">Piutang</label>
                       <div class="col-sm-2">                        
@@ -105,7 +117,7 @@
                       </div> 
                       <label class="col-sm-1 col-form-label">Admin</label>
                       <div class="col-sm-2">                        
-                        <input type="text" id="currency-field" data-type="currency" autocomplete="off" <?php echo $read ?> value="<?php echo $tampil = ($row!='') ? $row->admin : "" ; ?>" name="admin" placeholder="Admin" class="form-control" />
+                        <input type="text" id="currency-field" data-type="currency" autocomplete="off" <?php echo $read ?> value="<?php echo $tampil = ($row!='') ? $admin : "" ; ?>" name="admin" placeholder="Admin" class="form-control" />
                       </div>                                          
                     </div>
                     <div class="form-group row">                      
@@ -154,8 +166,8 @@
                       <th>ID</th>
                       <th>Tanggal</th>
                       <th>Jenis Transaksi</th>     
-                      <th>Pembayaran</th>                                       
-                      <th>Nominal</th>                 
+                      <th>Kredit</th>                                       
+                      <th>Debit</th>                 
                       <th>Keterangan</th>                 
                       <th width="10%"></th>
                     </tr>

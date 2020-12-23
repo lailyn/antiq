@@ -72,8 +72,8 @@ class Transaksi extends CI_Controller {
 			$row[] = "<a href='transaksi/detail?id=$isi->id_transaksi'>$isi->kode</a>";
 			$row[] = $isi->tanggal;
 			$row[] = $jenis;
-			$row[] = $isi->bayar;
-			$row[] = $this->mata_uang($isi->nominal);						
+			$row[] = $this->mata_uang($isi->kredit);						
+			$row[] = $this->mata_uang($isi->debit);						
 			$row[] = $isi->keterangan;
 			$row[] = "
 						<a href=\"transaksi/delete?id=$isi->id_transaksi\" onclick=\"return confirm('Anda yakin?')\" class=\"btn btn-danger btn-sm\">hapus</a>                          
@@ -142,11 +142,16 @@ class Transaksi extends CI_Controller {
 		$data['created_by'] = $id_user = $this->session->userdata("id_user");
 		$data['id_jenis'] 			= $this->input->post('id_jenis');				
 		$data['kode'] 			= $this->cari_id();
-		$data['bayar'] 			= $this->input->post('bayar');						
-		$data['keterangan'] 			= $this->input->post('keterangan');
-		$data['nominal'] 			= $this->m_admin->ubah_rupiah($this->input->post("nominal"));
+		$data['keterangan'] 			= $this->input->post('keterangan');		
+		$bayar 			= $this->input->post('bayar');						
+		if($bayar=="kredit"){
+			$data['kredit'] 			= $this->m_admin->ubah_rupiah($this->input->post("nominal"));
+			$data['admin2'] 			= $this->m_admin->ubah_rupiah($this->input->post("admin"));
+		}else{
+			$data['debit'] 			= $this->m_admin->ubah_rupiah($this->input->post("nominal"));			
+			$data['admin1'] 			= $this->m_admin->ubah_rupiah($this->input->post("admin"));			
+		}
 		$data['piutang'] 			= $this->m_admin->ubah_rupiah($this->input->post("piutang"));
-		$data['admin'] 			= $this->m_admin->ubah_rupiah($this->input->post("admin"));
 		$data['tanggal'] 			= $this->input->post('tanggal');									
 		$data['created_at'] 			= $waktu;
 		
@@ -163,11 +168,16 @@ class Transaksi extends CI_Controller {
 		
 		$id 			= $this->input->post('id');				
 		$data['id_jenis'] 			= $this->input->post('id_jenis');						
-		$data['bayar'] 			= $this->input->post('bayar');						
 		$data['keterangan'] 			= $this->input->post('keterangan');						
-		$data['nominal'] 			= $this->m_admin->ubah_rupiah($this->input->post("nominal"));
+		$bayar 			= $this->input->post('bayar');						
+		if($bayar=="kredit"){
+			$data['kredit'] 			= $this->m_admin->ubah_rupiah($this->input->post("nominal"));
+			$data['admin2'] 			= $this->m_admin->ubah_rupiah($this->input->post("admin"));
+		}else{
+			$data['debit'] 			= $this->m_admin->ubah_rupiah($this->input->post("nominal"));			
+			$data['admin1'] 			= $this->m_admin->ubah_rupiah($this->input->post("admin"));			
+		}
 		$data['piutang'] 			= $this->m_admin->ubah_rupiah($this->input->post("piutang"));
-		$data['admin'] 			= $this->m_admin->ubah_rupiah($this->input->post("admin"));
 		$data['tanggal'] 			= $this->input->post('tanggal');									
 		$data['updated_at'] 			= $waktu;
 		$data['updated_by'] = $id_user = $this->session->userdata("id_user");

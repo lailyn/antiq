@@ -57,7 +57,7 @@ CREATE TABLE `md_jenis` (
 
 insert  into `md_jenis`(`id_jenis`,`jenis`,`saldo_awal`,`status`,`created_at`,`updated_at`) values 
 (1,'BRI',83600054,1,'2020-12-21 21:35:46','2020-12-21 23:12:02'),
-(2,'BNI',NULL,1,'2020-12-21 23:11:56',NULL),
+(2,'BNI',8000000,1,'2020-12-21 23:11:56',NULL),
 (3,'Permata',NULL,1,'2020-12-21 23:16:18',NULL),
 (4,'Pospay',500000,1,'2020-12-21 23:16:51',NULL),
 (5,'Dana Tunai',NULL,1,'2020-12-21 23:16:56',NULL);
@@ -75,9 +75,26 @@ CREATE TABLE `md_rekap` (
   `kredit` int(10) DEFAULT NULL,
   `tunai` int(10) DEFAULT NULL,
   PRIMARY KEY (`id_rekap`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `md_rekap` */
+
+insert  into `md_rekap`(`id_rekap`,`id_jenis`,`tgl`,`saldo_awal`,`debit`,`kredit`,`tunai`) values 
+(1,1,'2020-12-01',54857054,29703000,960000,0),
+(2,2,'2020-12-01',-95000,100000,5000,0),
+(3,3,'2020-12-01',0,0,0,0),
+(4,4,'2020-12-01',0,0,0,0),
+(5,5,'2020-12-01',0,0,0,0),
+(6,1,'2020-12-25',83597054,3000,0,0),
+(7,2,'2020-12-25',83597054,3000,0,0),
+(8,3,'2020-12-25',83597054,3000,0,0),
+(9,4,'2020-12-25',84097054,3000,0,0),
+(10,5,'2020-12-25',84097054,3000,0,0),
+(11,1,'2020-12-31',83597054,3000,0,NULL),
+(12,2,'2020-12-31',-100000,100000,0,NULL),
+(13,3,'2020-12-31',0,0,0,NULL),
+(14,4,'2020-12-31',0,0,0,NULL),
+(15,5,'2020-12-31',0,0,0,NULL);
 
 /*Table structure for table `md_setting` */
 
@@ -122,17 +139,19 @@ CREATE TABLE `md_transaksi` (
   `updated_by` int(10) DEFAULT NULL,
   `delete` int(1) DEFAULT 0,
   PRIMARY KEY (`id_transaksi`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `md_transaksi` */
 
 insert  into `md_transaksi`(`id_transaksi`,`kode`,`tanggal`,`debit`,`kredit`,`admin1`,`admin2`,`piutang`,`id_jenis`,`keterangan`,`created_at`,`created_by`,`updated_at`,`updated_by`,`delete`) values 
-(5,'AN8400001','2020-12-01',3000,0,4000,0,0,1,'','2020-12-22 19:26:40',1,'2020-12-23 09:10:32',1,0),
+(5,'AN8400001','2020-12-01',3000,0,5000,0,0,1,'','2020-12-22 19:26:40',1,'2020-12-23 09:10:32',1,0),
 (6,'AN7600002','2020-12-01',3700000,0,0,0,0,1,'','2020-12-22 19:27:01',1,NULL,NULL,0),
 (7,'AN4100003','2020-12-01',1000000,0,5000,0,0,1,'','2020-12-22 19:27:17',1,NULL,NULL,0),
 (8,'AN1100004','2020-12-01',0,950000,0,5000,945000,1,'','2020-12-22 19:27:40',1,NULL,NULL,0),
 (9,'AN3200005','2020-12-01',25000000,0,0,0,0,1,'','2020-12-22 19:27:55',1,NULL,NULL,0),
-(10,'AN3600006','2020-12-23',NULL,10000,NULL,0,0,1,'','2020-12-23 08:02:42',1,NULL,NULL,0);
+(10,'AN3600006','2020-12-23',NULL,10000,NULL,0,0,1,'','2020-12-23 08:02:42',1,NULL,NULL,0),
+(11,'AN3600007','2020-12-01',100000,0,NULL,0,0,2,'','2020-12-23 08:02:42',1,NULL,NULL,0),
+(12,'AN3600007','2020-12-01',0,5000,NULL,0,0,2,'','2020-12-23 08:02:42',1,NULL,NULL,0);
 
 /*Table structure for table `md_user` */
 

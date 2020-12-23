@@ -24,189 +24,279 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
       ?>
       
                   
-      <table id="example" border="1" class="table table-bordered" style="width:100%">
-        <thead>
-          <tr>
-            <?php 
-            $tanggal = date("Y-m-d");
-            $kemarin = manipulasiTanggal($tgl,-1);                        
-            $sql = $this->m_admin->getByID("md_jenis","status",1);
-            foreach ($sql->result() as $isi) {
-              $cek_kemarin = $this->db->get_where("md_transaksi",array("id_jenis"=>$isi->id_jenis,"tanggal"=>$kemarin));
-              if($cek_kemarin->num_rows() > 0){
-                $saldo_awal = $cek_kemarin->row()->saldo_awal;
-              }else{
-                $saldo_awal = $this->db->get_where("md_jenis",array("id_jenis"=>$isi->id_jenis))->row()->saldo_awal;                            
-              }
+      <table id="example" class="table table-bordered" style="width:100%">
+                    <thead>
+                      <tr>
+                        <?php 
+                        $tanggal = date("Y-m-d");
+                        $kemarin = manipulasiTanggal($tgl,-1);                        
+                        $sql = $this->m_admin->getByID("md_jenis","status",1);
+                        foreach ($sql->result() as $isi) {
+                          $cek_kemarin = $this->db->get_where("md_transaksi",array("id_jenis"=>$isi->id_jenis,"tanggal"=>$kemarin));
+                          if($cek_kemarin->num_rows() > 0){
+                            $saldo_awal = 0;
+                          }else{
+                            $saldo_awal = $this->db->get_where("md_jenis",array("id_jenis"=>$isi->id_jenis))->row()->saldo_awal;                            
+                          }
 
-              if($isi->jenis=="Pospay"){
-                echo "
-                <td bgcolor='yellow' align='center' valign='middle' colspan='3' rowspan='4'>$isi->jenis</th>
-                <th>Saldo Awal</th>
-                <th>000</th>
-                ";
-              }elseif($isi->jenis=="Dana Tunai"){
-                echo "
-                <td bgcolor='yellow' align='center' valign='middle' colspan='3' rowspan='4'>$isi->jenis</th>                            
-                <th>000</th>
-                ";
-              }else{
-                echo "
-                <td bgcolor='yellow' align='center' valign='middle' colspan='5' rowspan='4'>$isi->jenis</th>
-                <th colspan='2'>Saldo Awal</th>
-                <th>".mata_uang($saldo_awal)."</th>
-                ";
-              }
-            }
-            ?>                        
-          </tr>
-          <tr>
-            <?php 
-            foreach ($sql->result() as $isi) {
-              $amb_debet = $this->db->query("SELECT SUM(nominal) as jum From md_transaksi WHERE id_jenis = '$isi->id_jenis' AND bayar = 'debit'");
-              if($isi->jenis=="Pospay"){
-                echo "                          
-                <th>Debet</th>
-                <th>000</th>
-                ";
-              }elseif($isi->jenis!='Dana Tunai'){                            
-                echo "                          
-                <th colspan='2'>Debet</th>
-                <th>".$amb_debet->row()->jum."</th>
-                ";                          
-              }else{
-                echo "<th>000</th>";
-              }
-            }
-            ?>                        
-          </tr>
-          <tr>
-            <?php 
-            foreach ($sql->result() as $isi) {
-              if($isi->jenis=="Pospay"){
-                echo "                          
-                <th>Kredit</th>
-                <th>000</th>
-                ";
-              }elseif($isi->jenis!='Dana Tunai'){                            
-                echo "                          
-                <th colspan='2'>Kredit</th>
-                <th>000</th>
-                ";                          
-              }else{
-                echo "<th>000</th>";
-              }
-            }
-            ?>                        
-          </tr>
-          <tr>
-            <?php 
-            foreach ($sql->result() as $isi) {
-              if($isi->jenis=="Pospay"){
-                echo "                          
-                <th>Tunai</th>
-                <th>000</th>
-                ";
-              }elseif($isi->jenis!='Dana Tunai'){                            
-                echo "                          
-                <th colspan='2'>Tunai</th>
-                <th>000</th>
-                ";                          
-              }else{
-                echo "<th>000</th>";
-              }
-            }
-            ?>                        
-          </tr>                     
-        </thead>
-        <tbody>
-          <tr>
-            <?php 
-            foreach ($sql->result() as $isi) {
-              if($isi->jenis!="Pospay" AND $isi->jenis!="Dana Tunai"){
-                echo "
-                <td>No</td>
-                <td>Debet</td>
-                <td></td>
-                <td>Kredit</td>
-                <td>Admin</td>
-                <td>Piutang</td>
-                <td>Admin</td>
-                <td>Saldo</td>
-                ";
-              }elseif($isi->jenis=="Pospay"){
-                echo "
-                <td>No</td>
-                <td>Debet</td>
-                <td>Kredit</td>
-                <td>Admin</td>
-                <td>Saldo</td>
-                ";
-              }elseif($isi->jenis=="Dana Tunai"){
-                echo "
-                <td>No</td>
-                <td>Lain-lain</td>
-                <td>Tujuan</td>                            
-                ";
-              }
-            }
-            ?>
-          </tr>
-          <?php 
-          $no=1;
-          $cek_maks = $this->db->query("SELECT COUNT(kode) AS jum FROM md_transaksi WHERE tanggal = '$tgl' GROUP BY id_jenis ORDER BY jum DESC LIMIT 0,1");
-          $maks = ($cek_maks->num_rows() > 0) ? $cek_maks->row()->jum : 0 ;
-          for ($i=0; $i <= $maks; $i++) {                      
-            echo "
-            <tr>";                          
-              foreach ($sql->result() as $isi) {
-                $cek_ket = $this->db->query("SELECT * FROM md_transaksi WHERE id_jenis = '$isi->id_jenis' ORDER BY id_transaksi ASC LIMIT $i,1");
-                $ket = ($cek_ket->num_rows() > 0) ? $cek_ket->row()->keterangan : "" ;
-                
+                          if($isi->jenis=="Pospay"){
+                            echo "
+                            <td bgcolor='yellow' align='center' valign='middle' colspan='3' rowspan='4'><font size='18px'>$isi->jenis</font></th>
+                            <th>Saldo Awal</th>
+                            <th>".mata_uang($saldo_awal)."</th>                            
+                            ";
+                          }elseif($isi->jenis=="Dana Tunai"){
+                            echo "
+                            <td bgcolor='yellow' align='center' valign='middle' colspan='4' rowspan='4'><font size='18px'>$isi->jenis</font></th>                            
+                            ";
+                          }else{
+                            echo "
+                            <td bgcolor='yellow' align='center' valign='middle' colspan='5' rowspan='4'><font size='18px'>$isi->jenis</font></th>
+                            <th colspan='2'>Saldo Awal</th>
+                            <th>".mata_uang($saldo_awal)."</th>
+                            ";
+                          }
+                        }
+                        ?>                        
+                      </tr>
+                      <tr>
+                        <?php 
+                        foreach ($sql->result() as $isi) {
+                          $amb_debit = $this->db->query("SELECT SUM(debit) as jum From md_transaksi WHERE id_jenis = '$isi->id_jenis'");
+                          if($isi->jenis=="Pospay"){
+                            echo "                          
+                            <th>Debet</th>
+                            <th>".mata_uang($sum_debit = $amb_debit->row()->jum)."</th>
+                            ";
+                          }elseif($isi->jenis!='Dana Tunai'){                            
+                            echo "                          
+                            <th colspan='2'>Debet</th>
+                            <th>".mata_uang($sum_debit = $amb_debit->row()->jum)."</th>
+                            ";                          
+                          }
+                        }
+                        ?>                        
+                      </tr>
+                      <tr>
+                        <?php 
+                        foreach ($sql->result() as $isi) {
+                          $amb_kredit = $this->db->query("SELECT SUM(kredit) as jum From md_transaksi WHERE id_jenis = '$isi->id_jenis'");                          
+                          if($isi->jenis=="Pospay"){
+                            echo "                          
+                            <th>Kredit</th>
+                            <th>".mata_uang($sum_kredit = $amb_kredit->row()->jum)."</th>
+                            ";
+                          }elseif($isi->jenis!='Dana Tunai'){                            
+                            echo "                          
+                            <th colspan='2'>Kredit</th>
+                            <th>".mata_uang($sum_kredit = $amb_kredit->row()->jum)."</th>
+                            ";                          
+                          }
+                        }
+                        ?>                        
+                      </tr>
+                      <tr>
+                        <?php 
+                        foreach ($sql->result() as $isi) {
+                          $sum_admin = $this->db->query("SELECT SUM(admin1) as jum From md_transaksi WHERE id_jenis = '$isi->id_jenis'")->row()->jum;                          
+                          $sum_debit = $this->db->query("SELECT SUM(debit) as jum From md_transaksi WHERE id_jenis = '$isi->id_jenis'")->row()->jum;                          
+                          $sum_piutang = $this->db->query("SELECT SUM(piutang) as jum From md_transaksi WHERE id_jenis = '$isi->id_jenis'")->row()->jum;                          
+                          if($isi->jenis=="Pospay"){
+                            $tunai = $sum_admin + $sum_debit;
+                            echo "                          
+                            <th>Tunai</th>
+                            <th>".mata_uang($tunai)."</th>
+                            ";
+                          }elseif($isi->jenis!='Dana Tunai'){                            
+                            $tunai = $sum_admin + $sum_debit - $sum_piutang;                          
+                            echo "                          
+                            <th colspan='2'>Tunai</th>
+                            <th>".mata_uang($tunai)."</th>
+                            ";                          
+                          }
+                        }
+                        ?>                        
+                      </tr>                     
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <?php 
+                        foreach ($sql->result() as $isi) {
+                          if($isi->jenis!="Pospay" AND $isi->jenis!="Dana Tunai"){
+                            echo "
+                            <th width='3%'>No</th>
+                            <td>Debet</td>
+                            <td></td>
+                            <td>Kredit</td>
+                            <td>Admin</td>
+                            <td>Piutang</td>
+                            <td>Admin</td>
+                            <td>Saldo</td>
+                            ";
+                          }elseif($isi->jenis=="Pospay"){
+                            echo "
+                            <td width='3%'>No</td>
+                            <td>Debet</td>
+                            <td>Kredit</td>
+                            <td>Admin</td>
+                            <td>Saldo</td>
+                            ";
+                          }elseif($isi->jenis=="Dana Tunai"){
+                            echo "
+                            <td width='3%'>No</td>
+                            <td>Lain-lain</td>
+                            <td>Tujuan</td>                            
+                            ";
+                          }
+                        }
+                        ?>
+                      </tr>
+                      <?php                       
+                      $no=1;                                                 
+                      foreach ($sql->result() as $key) {                        
+                        $id = $key->id_jenis;
+                        $t_debit[$id]=0;                        
+                        $t_kredit[$id]=0;                        
+                        $t_admin1[$id]=0;                        
+                        $t_admin2[$id]=0;                        
+                        $t_piutang[$id]=0;                        
+                        $t_saldo[$id]=0;                        
+                      }                      
+                      $cek_maks = $this->db->query("SELECT COUNT(kode) AS jum FROM md_transaksi WHERE tanggal = '$tgl' GROUP BY id_jenis ORDER BY jum DESC LIMIT 0,1");
+                      $maks = ($cek_maks->num_rows() > 0) ? $cek_maks->row()->jum : 0 ;
+                      for ($i=0; $i <= $maks; $i++) {                      
+                        echo "
+                        <tr>";                                                 
+                          foreach ($sql->result() as $isi) {
+                            $id = $isi->id_jenis;                                                      
 
-                $cek_debet = $this->db->query("SELECT * FROM md_transaksi WHERE bayar='debit' AND id_jenis = '$isi->id_jenis' ORDER BY id_transaksi ASC LIMIT $i,1");
-                $debet = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->nominal : 0 ;
-                $admin = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->admin : 0 ;
-                $piutang = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->piutang : 0 ;
+                            $cek_debet = $this->db->query("SELECT * FROM md_transaksi WHERE id_jenis = '$isi->id_jenis' ORDER BY id_transaksi ASC LIMIT $i,1");
+                            $debit[$id] = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->debit : 0 ;                            
+                            $kredit[$id] = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->kredit : 0 ;                            
+                            $piutang[$id] = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->piutang : 0 ;                            
+                            $admin1[$id] = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->admin1 : 0 ;                            
+                            $admin2[$id] = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->admin2 : 0 ;  
+                            $ket = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->keterangan : "" ;                          
 
-                $cek_kredit = $this->db->query("SELECT * FROM md_transaksi WHERE bayar='kredit' AND id_jenis = '$isi->id_jenis' ORDER BY id_transaksi ASC LIMIT $i,1");
-                $kredit = ($cek_kredit->num_rows() > 0) ? $cek_kredit->row()->nominal : 0 ;
-                if($isi->jenis!="Pospay" AND $isi->jenis!="Dana Tunai"){
-                  echo "                              
-                  <td>$no</td>
-                  <td align='right'>".mata_uang($debet)."</td>
-                  <td></td>
-                  <td align='right'>".mata_uang($kredit)."</td>
-                  <td></td>
-                  <td align='right'>".mata_uang($piutang)."</td>
-                  <td align='right'>".mata_uang($admin)."</td>
-                  <td align='right'>".mata_uang($saldo = $debet + $kredit)."</td>
-                  ";
-                }elseif($isi->jenis=="Pospay"){
-                  echo "                              
-                  <td>$no</td>
-                  <td>$debet</td>
-                  <td>$kredit</td>
-                  <td>Admin</td>                              
-                  <td>Saldo</td>
-                  ";
-                }elseif($isi->jenis=="Dana Tunai"){
-                  echo "                              
-                  <td>$no</td>
-                  <td>Debet</td>
-                  <td>Keterangan</td>                              
-                  <td>Saldo</td>                              
-                  ";
-                }
-              }
-              echo "
-            </tr>
-            ";
-            $no++;
-          }
-          ?>   
-        </tbody>
-      </table>                                   
+
+                            $cek_kemarin = $this->db->get_where("md_transaksi",array("id_jenis"=>$isi->id_jenis,"tanggal"=>$kemarin));
+                            if($cek_kemarin->num_rows() > 0){
+                              $saldo_awal = 0;
+                            }else{
+                              $saldo_awal = $this->db->get_where("md_jenis",array("id_jenis"=>$isi->id_jenis))->row()->saldo_awal;                            
+                            }                         
+                                                                                
+
+                            if($no==1){
+                              $saldo[$id] = ($saldo_awal - $debit[$id]) + $kredit[$id];
+                            }else{
+                              $saldo[$id] = ($t_saldo[$id] - $debit[$id]) + $kredit[$id];
+                            }
+
+                            if($no==1){
+                              $t_saldo[$id] += $saldo[$id];
+                            }else{
+                              $t_saldo[$id] = $saldo[$id];
+                            }
+                          
+                            if($isi->jenis!="Pospay" AND $isi->jenis!="Dana Tunai"){
+                              echo "                              
+                              <th>$no</th>
+                              <td align='right'>".mata_uang($debit[$id])."</td>
+                              <td></td>
+                              <td align='right'>".mata_uang($kredit[$id])."</td>
+                              <td align='right'>".mata_uang($admin1[$id])."</td>
+                              <td align='right'>".mata_uang($piutang[$id])."</td>
+                              <td align='right'>".mata_uang($admin2[$id])."</td>
+                              <td align='right'>".mata_uang($saldo[$id])."</td>
+                              ";
+                            }elseif($isi->jenis=="Pospay"){
+                              echo "                              
+                              <td>$no</td>
+                              <td align='right'>".mata_uang($debit[$id])."</td>
+                              <td align='right'>".mata_uang($kredit[$id])."</td>
+                              <td align='right'>".mata_uang($admin1[$id])."</td>
+                              <td align='right'>".mata_uang($saldo[$id])."</td>
+                              ";
+                            }elseif($isi->jenis=="Dana Tunai"){
+                              echo "                              
+                              <td>$no</td>
+                              <td></td>
+                              <td></td>                              
+                              <td></td>                              
+                              ";
+                            }
+                            $t_debit[$id] += $debit[$id];
+                            $t_kredit[$id] += $kredit[$id];
+                            $t_admin1[$id] += $admin1[$id];
+                            $t_admin2[$id] += $admin2[$id];
+                            $t_piutang[$id] += $piutang[$id];
+                            
+                            $data['id_jenis'] = $isi->id_jenis; 
+                            $data['tgl'] = $tgl; 
+                            $data['saldo_awal'] = $t_saldo[$id]; 
+                            $data['debit'] = $t_debit[$id]; 
+                            $data['kredit'] = $t_kredit[$id]; 
+                            //$data['tunai'] = $tunai; 
+                            $cek = $this->db->query("SELECT * FROM md_rekap WHERE id_jenis = '$isi->id_jenis' AND tgl = '$tgl'");
+                            if($cek->num_rows() > 0){
+                              $this->m_admin->update("md_rekap",$data,"id_rekap",$cek->row()->id_rekap);
+                            }else{
+                              $this->m_admin->insert("md_rekap",$data);
+                            }                            
+                          
+                            $no++;
+                          }
+                          echo "
+                        </tr>
+                        ";
+
+                      }
+                      ?>   
+                    </tbody>
+                    <tfoot>                      
+                        <?php 
+                        echo "
+                        <tr>"; 
+                          foreach ($sql->result() as $isi) {  
+                            $id = $isi->id_jenis;                          
+                            if($isi->jenis!="Pospay" AND $isi->jenis!="Dana Tunai"){
+                              echo "                              
+                              <th>Total</th>
+                              <td align='right'>".mata_uang($t_debit[$id])."</td>
+                              <td></td>
+                              <td align='right'>".mata_uang($t_kredit[$id])."</td>
+                              <td align='right'>".mata_uang($t_admin1[$id])."</td>
+                              <td align='right'>".mata_uang($t_piutang[$id])."</td>
+                              <td align='right'>".mata_uang($t_admin2[$id])."</td>
+                              <td align='right'>".mata_uang($t_saldo[$id])."</td>
+                              ";
+                            }elseif($isi->jenis=="Pospay"){
+                              echo "                              
+                              <th>Total</th>
+                              <td align='right'>".mata_uang($t_debit[$id])."</td>
+                              <td align='right'>".mata_uang($t_kredit[$id])."</td>
+                              <td align='right'>".mata_uang($t_admin1[$id])."</td>
+                              <td align='right'>".mata_uang($t_saldo[$id])."</td>
+                              ";
+                            }elseif($isi->jenis=="Dana Tunai"){
+                              echo "                              
+                              <th>Total</th>
+                              <td align='right'>".mata_uang($t_debit[$id])."</td>
+                              <td></td>                              
+                              <td align='right'>".mata_uang($t_saldo[$id])."</td>
+                              ";
+                            }
+                        
+
+                          }
+                          echo "
+                        </tr>
+                        ";
+                        ?>
+                      
+                    </tfoot>
+                  </table>                                   
         
     <?php }elseif($set=="filter"){ ?>
 
@@ -323,14 +413,14 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                           $sum_admin = $this->db->query("SELECT SUM(admin1) as jum From md_transaksi WHERE id_jenis = '$isi->id_jenis'")->row()->jum;                          
                           $sum_debit = $this->db->query("SELECT SUM(debit) as jum From md_transaksi WHERE id_jenis = '$isi->id_jenis'")->row()->jum;                          
                           $sum_piutang = $this->db->query("SELECT SUM(piutang) as jum From md_transaksi WHERE id_jenis = '$isi->id_jenis'")->row()->jum;                          
-                          $tunai = $sum_admin + $sum_debit - $sum_piutang;
-                          $tunai_2 = $sum_admin + $sum_debit;
                           if($isi->jenis=="Pospay"){
+                            $tunai = $sum_admin + $sum_debit;
                             echo "                          
                             <th>Tunai</th>
-                            <th>".mata_uang($tunai_2)."</th>
+                            <th>".mata_uang($tunai)."</th>
                             ";
                           }elseif($isi->jenis!='Dana Tunai'){                            
+                            $tunai = $sum_admin + $sum_debit - $sum_piutang;                          
                             echo "                          
                             <th colspan='2'>Tunai</th>
                             <th>".mata_uang($tunai)."</th>
@@ -373,20 +463,31 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                         }
                         ?>
                       </tr>
-                      <?php 
-                      $no=1;$t_debit=0;$t_kredit=0;$t_admin1=0;$t_admin2=0;$t_piutang=0;$t_saldo=0;
+                      <?php                       
+                      $no=1;                                                 
+                      foreach ($sql->result() as $key) {                        
+                        $id = $key->id_jenis;
+                        $t_debit[$id]=0;                        
+                        $t_kredit[$id]=0;                        
+                        $t_admin1[$id]=0;                        
+                        $t_admin2[$id]=0;                        
+                        $t_piutang[$id]=0;                        
+                        $t_saldo[$id]=0;                        
+                      }                      
                       $cek_maks = $this->db->query("SELECT COUNT(kode) AS jum FROM md_transaksi WHERE tanggal = '$tgl' GROUP BY id_jenis ORDER BY jum DESC LIMIT 0,1");
                       $maks = ($cek_maks->num_rows() > 0) ? $cek_maks->row()->jum : 0 ;
                       for ($i=0; $i <= $maks; $i++) {                      
                         echo "
-                        <tr>";                                                   
+                        <tr>";                                                 
                           foreach ($sql->result() as $isi) {
+                            $id = $isi->id_jenis;                                                      
+
                             $cek_debet = $this->db->query("SELECT * FROM md_transaksi WHERE id_jenis = '$isi->id_jenis' ORDER BY id_transaksi ASC LIMIT $i,1");
-                            $debit = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->debit : 0 ;                            
-                            $kredit = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->kredit : 0 ;                            
-                            $piutang = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->piutang : 0 ;                            
-                            $admin1 = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->admin1 : 0 ;                            
-                            $admin2 = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->admin2 : 0 ;  
+                            $debit[$id] = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->debit : 0 ;                            
+                            $kredit[$id] = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->kredit : 0 ;                            
+                            $piutang[$id] = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->piutang : 0 ;                            
+                            $admin1[$id] = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->admin1 : 0 ;                            
+                            $admin2[$id] = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->admin2 : 0 ;  
                             $ket = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->keterangan : "" ;                          
 
 
@@ -396,31 +497,38 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                             }else{
                               $saldo_awal = $this->db->get_where("md_jenis",array("id_jenis"=>$isi->id_jenis))->row()->saldo_awal;                            
                             }                         
-                            
+                                                                                
+
                             if($no==1){
-                              $saldo = ($saldo_awal - $debit) + $kredit;
+                              $saldo[$id] = ($saldo_awal - $debit[$id]) + $kredit[$id];
                             }else{
-                              $saldo = ($t_saldo - $debit) + $kredit;
+                              $saldo[$id] = ($t_saldo[$id] - $debit[$id]) + $kredit[$id];
+                            }
+
+                            if($no==1){
+                              $t_saldo[$id] += $saldo[$id];
+                            }else{
+                              $t_saldo[$id] = $saldo[$id];
                             }
                           
                             if($isi->jenis!="Pospay" AND $isi->jenis!="Dana Tunai"){
                               echo "                              
                               <th>$no</th>
-                              <td align='right'>".mata_uang($debit)."</td>
+                              <td align='right'>".mata_uang($debit[$id])."</td>
                               <td></td>
-                              <td align='right'>".mata_uang($kredit)."</td>
-                              <td align='right'>".mata_uang($admin1)."</td>
-                              <td align='right'>".mata_uang($piutang)."</td>
-                              <td align='right'>".mata_uang($admin2)."</td>
-                              <td align='right'>".mata_uang($saldo)."</td>
+                              <td align='right'>".mata_uang($kredit[$id])."</td>
+                              <td align='right'>".mata_uang($admin1[$id])."</td>
+                              <td align='right'>".mata_uang($piutang[$id])."</td>
+                              <td align='right'>".mata_uang($admin2[$id])."</td>
+                              <td align='right'>".mata_uang($saldo[$id])."</td>
                               ";
                             }elseif($isi->jenis=="Pospay"){
                               echo "                              
                               <td>$no</td>
-                              <td align='right'>".mata_uang($debit)."</td>
-                              <td align='right'>".mata_uang($kredit)."</td>
-                              <td align='right'>".mata_uang($admin1)."</td>
-                              <td align='right'>".mata_uang($saldo)."</td>
+                              <td align='right'>".mata_uang($debit[$id])."</td>
+                              <td align='right'>".mata_uang($kredit[$id])."</td>
+                              <td align='right'>".mata_uang($admin1[$id])."</td>
+                              <td align='right'>".mata_uang($saldo[$id])."</td>
                               ";
                             }elseif($isi->jenis=="Dana Tunai"){
                               echo "                              
@@ -430,21 +538,31 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                               <td></td>                              
                               ";
                             }
-                            $t_debit += $debit;
-                            $t_kredit += $kredit;
-                            $t_admin1 += $admin1;
-                            $t_admin2 += $admin2;
-                            $t_piutang += $piutang;
-                            if($no==1){
-                              $t_saldo += $saldo;
+                            $t_debit[$id] += $debit[$id];
+                            $t_kredit[$id] += $kredit[$id];
+                            $t_admin1[$id] += $admin1[$id];
+                            $t_admin2[$id] += $admin2[$id];
+                            $t_piutang[$id] += $piutang[$id];
+                            
+                            $data['id_jenis'] = $isi->id_jenis; 
+                            $data['tgl'] = $tgl; 
+                            $data['saldo_awal'] = $t_saldo[$id]; 
+                            $data['debit'] = $t_debit[$id]; 
+                            $data['kredit'] = $t_kredit[$id]; 
+                            //$data['tunai'] = $tunai; 
+                            $cek = $this->db->query("SELECT * FROM md_rekap WHERE id_jenis = '$isi->id_jenis' AND tgl = '$tgl'");
+                            if($cek->num_rows() > 0){
+                              $this->m_admin->update("md_rekap",$data,"id_rekap",$cek->row()->id_rekap);
                             }else{
-                              $t_saldo = $saldo;
-                            }
+                              $this->m_admin->insert("md_rekap",$data);
+                            }                            
+                          
+                            $no++;
                           }
                           echo "
                         </tr>
                         ";
-                        $no++;
+
                       }
                       ?>   
                     </tbody>
@@ -452,39 +570,41 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                         <?php 
                         echo "
                         <tr>"; 
-                          foreach ($sql->result() as $isi) {                            
+                          foreach ($sql->result() as $isi) {  
+                            $id = $isi->id_jenis;                          
                             if($isi->jenis!="Pospay" AND $isi->jenis!="Dana Tunai"){
                               echo "                              
                               <th>Total</th>
-                              <td align='right'>".mata_uang($t_debit)."</td>
+                              <td align='right'>".mata_uang($t_debit[$id])."</td>
                               <td></td>
-                              <td align='right'>".mata_uang($t_kredit)."</td>
-                              <td align='right'>".mata_uang($t_admin1)."</td>
-                              <td align='right'>".mata_uang($t_piutang)."</td>
-                              <td align='right'>".mata_uang($t_admin2)."</td>
-                              <td align='right'>".mata_uang($t_saldo)."</td>
+                              <td align='right'>".mata_uang($t_kredit[$id])."</td>
+                              <td align='right'>".mata_uang($t_admin1[$id])."</td>
+                              <td align='right'>".mata_uang($t_piutang[$id])."</td>
+                              <td align='right'>".mata_uang($t_admin2[$id])."</td>
+                              <td align='right'>".mata_uang($t_saldo[$id])."</td>
                               ";
                             }elseif($isi->jenis=="Pospay"){
                               echo "                              
-                              <td>$no</td>
-                              <td>$debit</td>
-                              <td>$kredit</td>
-                              <td>Admin</td>                              
-                              <td>Saldo</td>
+                              <th>Total</th>
+                              <td align='right'>".mata_uang($t_debit[$id])."</td>
+                              <td align='right'>".mata_uang($t_kredit[$id])."</td>
+                              <td align='right'>".mata_uang($t_admin1[$id])."</td>
+                              <td align='right'>".mata_uang($t_saldo[$id])."</td>
                               ";
                             }elseif($isi->jenis=="Dana Tunai"){
                               echo "                              
-                              <td>$no</td>
-                              <td>Debet</td>
-                              <td>Keterangan</td>                              
-                              <td>Saldo</td>                              
+                              <th>Total</th>
+                              <td align='right'>".mata_uang($t_debit[$id])."</td>
+                              <td></td>                              
+                              <td align='right'>".mata_uang($t_saldo[$id])."</td>
                               ";
                             }
+                        
+
                           }
                           echo "
                         </tr>
                         ";
-                        $t_debit=0;$t_kredit=0;$t_admin1=0;$t_admin2=0;$t_piutang=0;$t_saldo=0;                                                 
                         ?>
                       
                     </tfoot>

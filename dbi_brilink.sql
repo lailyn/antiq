@@ -46,7 +46,7 @@ DROP TABLE IF EXISTS `md_jenis`;
 CREATE TABLE `md_jenis` (
   `id_jenis` int(10) NOT NULL AUTO_INCREMENT,
   `jenis` varchar(50) DEFAULT NULL,
-  `id_bayar` varchar(20) DEFAULT NULL,
+  `saldo_awal` int(20) DEFAULT NULL,
   `status` int(1) NOT NULL DEFAULT 1,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
@@ -55,12 +55,29 @@ CREATE TABLE `md_jenis` (
 
 /*Data for the table `md_jenis` */
 
-insert  into `md_jenis`(`id_jenis`,`jenis`,`id_bayar`,`status`,`created_at`,`updated_at`) values 
-(1,'BRI','1,2,4,5',1,'2020-12-21 21:35:46','2020-12-21 23:12:02'),
-(2,'BNI','1,2,4,5',1,'2020-12-21 23:11:56',NULL),
-(3,'Permata','',1,'2020-12-21 23:16:18',NULL),
-(4,'Pospay',NULL,1,'2020-12-21 23:16:51',NULL),
+insert  into `md_jenis`(`id_jenis`,`jenis`,`saldo_awal`,`status`,`created_at`,`updated_at`) values 
+(1,'BRI',83600054,1,'2020-12-21 21:35:46','2020-12-21 23:12:02'),
+(2,'BNI',NULL,1,'2020-12-21 23:11:56',NULL),
+(3,'Permata',NULL,1,'2020-12-21 23:16:18',NULL),
+(4,'Pospay',500000,1,'2020-12-21 23:16:51',NULL),
 (5,'Dana Tunai',NULL,1,'2020-12-21 23:16:56',NULL);
+
+/*Table structure for table `md_rekap` */
+
+DROP TABLE IF EXISTS `md_rekap`;
+
+CREATE TABLE `md_rekap` (
+  `id_rekap` int(10) NOT NULL AUTO_INCREMENT,
+  `id_jenis` int(10) DEFAULT NULL,
+  `tgl` date DEFAULT NULL,
+  `saldo_awal` int(10) DEFAULT NULL,
+  `debit` int(10) DEFAULT NULL,
+  `kredit` int(10) DEFAULT NULL,
+  `tunai` int(10) DEFAULT NULL,
+  PRIMARY KEY (`id_rekap`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+/*Data for the table `md_rekap` */
 
 /*Table structure for table `md_setting` */
 
@@ -92,26 +109,30 @@ CREATE TABLE `md_transaksi` (
   `id_transaksi` int(10) NOT NULL AUTO_INCREMENT,
   `kode` varchar(10) DEFAULT NULL,
   `tanggal` date DEFAULT NULL,
-  `nominal` int(20) DEFAULT NULL,
+  `debit` int(10) DEFAULT 0,
+  `kredit` int(10) DEFAULT 0,
+  `admin1` int(10) DEFAULT 0,
+  `admin2` int(10) DEFAULT 0,
+  `piutang` int(20) DEFAULT 0,
   `id_jenis` int(10) DEFAULT NULL,
   `keterangan` varchar(300) DEFAULT NULL,
-  `piutang` int(20) DEFAULT NULL,
-  `admin` int(20) DEFAULT NULL,
-  `bayar` varchar(10) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `created_by` int(10) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `updated_by` int(10) DEFAULT NULL,
   `delete` int(1) DEFAULT 0,
   PRIMARY KEY (`id_transaksi`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `md_transaksi` */
 
-insert  into `md_transaksi`(`id_transaksi`,`kode`,`tanggal`,`nominal`,`id_jenis`,`keterangan`,`piutang`,`admin`,`bayar`,`created_at`,`created_by`,`updated_at`,`updated_by`,`delete`) values 
-(2,'AN6900013','2020-12-21',9000000,1,'tes22',900000,100000,'kredit','2020-12-21 22:50:12',NULL,'2020-12-22 00:15:13',1,0),
-(3,'AN6900015','2020-12-21',20000,2,'tes22',900000,100000,'kredit','2020-12-21 22:50:12',NULL,'2020-12-22 00:15:13',1,0),
-(4,'AN6900014','2020-12-21',8000,2,'tes223',900000,100000,'kredit','2020-12-21 22:50:12',NULL,'2020-12-22 00:15:13',1,0);
+insert  into `md_transaksi`(`id_transaksi`,`kode`,`tanggal`,`debit`,`kredit`,`admin1`,`admin2`,`piutang`,`id_jenis`,`keterangan`,`created_at`,`created_by`,`updated_at`,`updated_by`,`delete`) values 
+(5,'AN8400001','2020-12-01',3000,0,4000,0,0,1,'','2020-12-22 19:26:40',1,'2020-12-23 09:10:32',1,0),
+(6,'AN7600002','2020-12-01',3700000,0,0,0,0,1,'','2020-12-22 19:27:01',1,NULL,NULL,0),
+(7,'AN4100003','2020-12-01',1000000,0,5000,0,0,1,'','2020-12-22 19:27:17',1,NULL,NULL,0),
+(8,'AN1100004','2020-12-01',0,950000,0,5000,945000,1,'','2020-12-22 19:27:40',1,NULL,NULL,0),
+(9,'AN3200005','2020-12-01',25000000,0,0,0,0,1,'','2020-12-22 19:27:55',1,NULL,NULL,0),
+(10,'AN3600006','2020-12-23',NULL,10000,NULL,0,0,1,'','2020-12-23 08:02:42',1,NULL,NULL,0);
 
 /*Table structure for table `md_user` */
 

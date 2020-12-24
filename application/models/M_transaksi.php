@@ -4,8 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class M_transaksi extends CI_Model {
 
     var $table = 'md_transaksi';
-    var $column_order = array(null,'id_transaksi','transaksi','kode_transaksi'); //set column field database for datatable orderable
-    var $column_search = array('id_transaksi','kode_transaksi','transaksi'); //set column field database for datatable searchable
+    var $column_order = array(null,'id_transaksi','id_jenis','kode'); //set column field database for datatable orderable
+    var $column_search = array('id_transaksi','kode','id_jenis'); //set column field database for datatable searchable
     var $order = array('id_transaksi' => 'desc'); // default order
 
     public function __construct()

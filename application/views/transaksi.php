@@ -79,7 +79,7 @@
                           <?php                           
                           foreach ($dt_jenis->result() as $isi) {
                             $id_jenis = ($row!='') ? $row->id_jenis : "";
-                            if($id_jenis!='' && $id_jenis==$isi->id_jenis){
+                            if(($id_jenis!='' && $id_jenis==$isi->id_jenis) OR $isi->id_jenis==$id_jenis_simpan){
                              $se = "selected";
                             }else{
                               $se="";
@@ -91,18 +91,27 @@
                       </div>    
                       <label class="col-sm-1 col-form-label">Tanggal</label>
                       <div class="col-sm-3">                        
-                        <input type="date" <?php echo $read ?> value="<?php echo $tampil = ($row!='') ? $row->tanggal : date("Y-m-d") ; ?>" name="tanggal" placeholder="Tanggal" class="form-control" />
+                        <?php
+                        if($row!=""){
+                          $tang = $row->tanggal;
+                        }elseif($tanggal_simpan!=""){
+                          $tang = $tanggal_simpan;
+                        }else{ 
+                          $tang = date("Y-m-d") ;
+                        }
+                        ?>
+                        <input type="date" <?php echo $read ?> value="<?php echo $tang ?>" name="tanggal" placeholder="Tanggal" class="form-control" />
                       </div>                
                       <div class="col-sm-2">
                         <div class="form-check">
                           <label class="form-check-label">
-                            <input type="radio" <?php echo $read2 ?> class="form-check-input" name="bayar" id="membershipRadios1" value="kredit" <?php echo $tampil = ($row!='' AND $bayar=='kredit') ? "checked" : "" ; ?>> Kredit </label>
+                            <input type="radio" <?php echo $read2 ?> class="form-check-input" name="bayar" id="membershipRadios1" value="kredit" <?php echo $tampil = (($row!='' AND $bayar=='kredit') OR $bayar_simpan=="kredit") ? "checked" : "" ; ?>> Kredit </label>
                         </div>
                       </div>
                       <div class="col-sm-2">
                         <div class="form-check">
                           <label class="form-check-label">
-                            <input type="radio" <?php echo $read2 ?> class="form-check-input" name="bayar" <?php echo $tampil = ($row!='' AND $bayar=='debit') ? "checked" : "" ; ?> id="membershipRadios2" value="debit"> Debit </label>
+                            <input type="radio" <?php echo $read2 ?> class="form-check-input" name="bayar" <?php echo $tampil = (($row!='' AND $bayar=='debit') OR $bayar_simpan=="debit" ) ? "checked" : "" ; ?> id="membershipRadios2" value="debit"> Debit </label>
                         </div>
                       </div>                      
                     </div> 
@@ -168,7 +177,6 @@
                       <th>Jenis Transaksi</th>     
                       <th>Kredit</th>                                       
                       <th>Debit</th>                 
-                      <th>Keterangan</th>                 
                       <th width="10%"></th>
                     </tr>
                   </thead>

@@ -74,7 +74,6 @@ class Transaksi extends CI_Controller {
 			$row[] = $jenis;
 			$row[] = $this->mata_uang($isi->kredit);						
 			$row[] = $this->mata_uang($isi->debit);						
-			$row[] = $isi->keterangan;
 			$row[] = "
 						<a href=\"transaksi/delete?id=$isi->id_transaksi\" onclick=\"return confirm('Anda yakin?')\" class=\"btn btn-danger btn-sm\">hapus</a>                          
             <a href=\"transaksi/edit?id=$isi->id_transaksi\" class=\"btn btn-primary btn-sm\">ubah</a>";	
@@ -97,6 +96,9 @@ class Transaksi extends CI_Controller {
 		$data['bread']	= $this->bread;																															
 		$data['set']		= "insert";	
 		$data['mode']		= "insert";
+		$data['id_jenis_simpan']		= "";
+		$data['tanggal_simpan']		= "";
+		$data['bayar_simpan']		= "";
 		$data['dt_jenis'] = $this->m_admin->getByID("md_jenis","status",1);									
 		$data['dt_bayar'] = $this->m_admin->getByID("md_bayar","status",1);									
 		$this->template($data);	
@@ -139,26 +141,37 @@ class Transaksi extends CI_Controller {
 		$waktu 		= gmdate("Y-m-d H:i:s", time()+60*60*7);		
 		$tabel		= $this->tables;		
 		$pk				= $this->pk;
-		$data['created_by'] = $id_user = $this->session->userdata("id_user");
-		$data['id_jenis'] 			= $this->input->post('id_jenis');				
+		$data['created_by'] = $this->session->userdata("id_user");
+		$data['id_jenis'] 	= $data2['id_jenis_simpan']		= $this->input->post('id_jenis');				
 		$data['kode'] 			= $this->cari_id();
 		$data['keterangan'] 			= $this->input->post('keterangan');		
 		$bayar 			= $this->input->post('bayar');						
 		if($bayar=="kredit"){
+			$data2['bayar_simpan'] = "kredit";
 			$data['kredit'] 			= $this->m_admin->ubah_rupiah($this->input->post("nominal"));
 			$data['admin2'] 			= $this->m_admin->ubah_rupiah($this->input->post("admin"));
 		}else{
+			$data2['bayar_simpan'] = "debit";
 			$data['debit'] 			= $this->m_admin->ubah_rupiah($this->input->post("nominal"));			
 			$data['admin1'] 			= $this->m_admin->ubah_rupiah($this->input->post("admin"));			
 		}
 		$data['piutang'] 			= $this->m_admin->ubah_rupiah($this->input->post("piutang"));
-		$data['tanggal'] 			= $this->input->post('tanggal');									
+		$data['tanggal'] 	= $data2['tanggal_simpan']		= $this->input->post('tanggal');									
 		$data['created_at'] 			= $waktu;
 		
 		$this->m_admin->insert($tabel,$data);					
-		$_SESSION['pesan'] 		= "Data berhasil diubah";
-		$_SESSION['tipe'] 		= "success";						
-		echo "<meta http-equiv='refresh' content='0; url=".base_url()."transaksi'>";							
+		$_SESSION['pesan'] 		= "Data berhasil disimpan";
+		$_SESSION['tipe'] 		= "success";				
+		
+		$data2['isi']    = $this->page;		
+		$data2['title']	= "Tambah ".$this->title;	
+		$data2['bread']	= $this->bread;																															
+		$data2['set']		= "insert";	
+		$data2['mode']		= "insert";		
+		$data2['dt_jenis'] = $this->m_admin->getByID("md_jenis","status",1);									
+		$data2['dt_bayar'] = $this->m_admin->getByID("md_bayar","status",1);									
+		$this->template($data2);			
+		
 	}	
 	public function update()
 	{		

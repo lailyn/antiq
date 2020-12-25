@@ -211,7 +211,10 @@ class Transaksi extends CI_Controller {
 		$pk			= $this->pk;
 		$id 		= $this->input->get('id');																															
 		$data['set']		= "insert";		
-		$data['mode']		= "edit";				
+		$data['mode']		= "edit";	
+		$data['id_jenis_simpan']		= "";
+		$data['tanggal_simpan']		= "";
+		$data['bayar_simpan']		= "";			
 		$data['dt_jenis'] = $this->m_admin->getByID("md_jenis","status",1);									
 		$data['dt_bayar'] = $this->m_admin->getByID("md_bayar","status",1);									
 		$data['dt_transaksi'] = $this->m_admin->getByID($tabel,$pk,$id);		
@@ -226,6 +229,9 @@ class Transaksi extends CI_Controller {
 		$pk			= $this->pk;
 		$id 		= $this->input->get('id');																															
 		$data['set']		= "insert";		
+		$data['id_jenis_simpan']		= "";
+		$data['tanggal_simpan']		= "";
+		$data['bayar_simpan']		= "";
 		$data['dt_jenis'] = $this->m_admin->getByID("md_jenis","status",1);									
 		$data['dt_bayar'] = $this->m_admin->getByID("md_bayar","status",1);											
 		$data['dt_transaksi'] = $this->m_admin->getByID($tabel,$pk,$id);

@@ -27,7 +27,8 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
       <table id="example" class="table table-bordered" style="width:100%">
         <thead>
           <tr>
-            <?php                         
+            <?php     
+            $dana_tunai = 0;                    
             $kemarin = manipulasiTanggal($tgl,-1);                        
             $sql = $this->m_admin->getByID("md_jenis","status",1);
             foreach ($sql->result() as $isi) {
@@ -48,7 +49,7 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                 ";
               }elseif($isi->jenis=="Dana Tunai"){
                 echo "
-                <td bgcolor='yellow' align='center' valign='middle' colspan='4' rowspan='4'><font size='18px'>$isi->jenis</font></th>                            
+                <td bgcolor='yellow' align='center' valign='middle' colspan='3' rowspan='4'><font size='18px'>$isi->jenis</font></th>                            
                 ";
               }else{
                 echo "
@@ -107,6 +108,7 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
           </tr>
           <tr>
             <?php 
+            $dana_tunai = 0;
             foreach ($sql->result() as $isi) {
               $cek_tgl = date('d', strtotime($tgl)); 
 
@@ -123,12 +125,14 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
               $sum_piutang = $this->db->query("SELECT SUM(piutang) as jum From md_transaksi WHERE tanggal = '$tgl' AND id_jenis = '$isi->id_jenis'")->row()->jum;                          
               if($isi->jenis=="Pospay"){
                 $tunai[$id] = $sum_admin + $sum_debit;
+                $dana_tunai+=$tunai[$id];
                 echo "                          
                 <th>Tunai</th>
                 <th>".mata_uang($tunai[$id])."</th>
                 ";
               }elseif($isi->jenis!='Dana Tunai'){                            
                 $tunai[$id] = $sum_admin + $sum_debit - $sum_piutang;                          
+                $dana_tunai+=$tunai[$id];
                 echo "                          
                 <th colspan='2'>Tunai</th>
                 <th>".mata_uang($tunai[$id])."</th>
@@ -165,9 +169,9 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                 ";
               }elseif($isi->jenis=="Dana Tunai"){
                 echo "
-                <td width='3%'>No</td>
                 <td>Lain-lain</td>
                 <td>Tujuan</td>                            
+                <td align='right'><b>".mata_uang($dana_tunai)."</b></td>                            
                 ";
               }
             }
@@ -191,17 +195,32 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
               $am = $this->db->query("SELECT * FROM md_rekap WHERE tgl = '$kemarin' AND id_jenis = '$isi->id_jenis'");
               $tunai_kemarin[$id] = ($am->num_rows()>0) ? $am->row()->tunai: 0 ;
               $saldo[$id] = $saldo_awal[$id] - $tunai_kemarin[$id];
-              echo "
-              
-                <td></td>
-                <td align='right'>".mata_uang($tunai_kemarin[$id])."</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td align='right'>".mata_uang($saldo[$id])."</td>
-              ";
+              if($isi->jenis!="Pospay" AND $isi->jenis!="Dana Tunai"){
+                echo "                          
+                  <td></td>
+                  <td align='right'>".mata_uang($tunai_kemarin[$id])."</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td align='right'>".mata_uang($saldo[$id])."</td>
+                ";
+              }elseif($isi->jenis=="Pospay"){
+                echo "                          
+                  <td></td>
+                  <td align='right'>".mata_uang($tunai_kemarin[$id])."</td>                                                            
+                  <td></td>
+                  <td></td>
+                  <td align='right'>".mata_uang($saldo[$id])."</td>
+                ";
+              }else{
+                echo "                                                        
+                  <td align='right'></td>                                                                                          
+                  <td></td>
+                  <td align='right'>".mata_uang($dana_tunai)."</td>
+                ";
+              }
             }
           }                 
                                 
@@ -209,7 +228,8 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
           $maks = ($cek_maks->num_rows() > 0) ? $cek_maks->row()->jum : 0 ;
           for ($i=0; $i <= $maks; $i++) {                      
             echo "
-            <tr>";                                                 
+            <tr>";   
+              $kredit_dana_t=0;                                              
               foreach ($sql->result() as $isi) {
                 $id = $isi->id_jenis;        
                 $cek_tgl = date('d', strtotime($tgl)); 
@@ -223,6 +243,9 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                 $admin2[$id] = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->admin2 : 0 ;  
                 $ket = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->keterangan : "" ;                          
 
+                $cek_dana = $this->db->query("SELECT * FROM md_transaksi INNER JOIN md_jenis ON md_transaksi.id_jenis = md_jenis.id_jenis 
+                    WHERE jenis = 'Dana Tunai' AND tanggal = '$tgl' ORDER BY id_transaksi ASC LIMIT $i,1");
+                $kredit_dana = ($cek_dana->num_rows() > 0) ? $cek_dana->row()->kredit : 0 ;                            
 
                 $cek_kemarin = $this->db->get_where("md_transaksi",array("id_jenis"=>$isi->id_jenis,"tanggal"=>$kemarin));
                 if($cek_kemarin->num_rows() > 0){
@@ -242,13 +265,20 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                   $saldo[$id] = $saldo_awal[$id] - $tunai_kemarin[$id];
                   if($no==1) $saldo[$id] = ($saldo[$id] - $debit[$id]) + $kredit[$id];                              
                     else $saldo[$id] = ($t_saldo[$id] - $debit[$id]) + $kredit[$id];                              
+                  $dana_tunai += $saldo[$id];
                 }else{
                   if($no==1) $saldo[$id] = ($saldo_awal[$id] - $debit[$id]) + $kredit[$id];
                     else $saldo[$id] = ($t_saldo[$id] - $debit[$id]) + $kredit[$id];                              
+                  $dana_tunai += $saldo[$id];
                 }
 
                 if($no==1) $t_saldo[$id] += $saldo[$id];
-                  else $t_saldo[$id] = $saldo[$id];                            
+                  else $t_saldo[$id] = $saldo[$id];   
+
+                if($no==1) $saldo_dana = $dana_tunai;
+                  else $saldo_dana += $kredit_dana;   
+                           
+                //$kredit_dana_t += $kredit_dana;                  
               
                 if($isi->jenis!="Pospay" AND $isi->jenis!="Dana Tunai"){
                   echo "                              
@@ -271,10 +301,9 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                   ";
                 }elseif($isi->jenis=="Dana Tunai"){
                   echo "                              
-                  <td>$no</td>
-                  <td></td>
-                  <td></td>                              
-                  <td></td>                              
+                  <td align='right'>".mata_uang($kredit[$id])."</td>
+                  <td align='right'></td>
+                  <td align='right'>".mata_uang($saldo_dana)."</td>                                                                                      
                   ";
                 }
                 
@@ -293,9 +322,12 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                   $data['debit'] = $t_debit[$id] + $tunai_kemarin[$id];                            
                 }else{                               
                   $data['debit'] = $t_debit[$id];                            
-                }                     
-                
-                $data['saldo'] = $t_saldo[$id];                            
+                }
+                if($isi->jenis=="Dana Tunai"){
+                  $data['saldo'] = $saldo_dana;                            
+                }else{                                               
+                  $data['saldo'] = $t_saldo[$id];                            
+                }
                 $data['kredit'] = $t_kredit[$id]; 
                 $data['admin1'] = $t_admin1[$id]; 
                 $data['admin2'] = $t_admin2[$id]; 
@@ -350,11 +382,10 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                   <td align='right'>".mata_uang($t_saldo[$id])."</td>
                   ";
                 }elseif($isi->jenis=="Dana Tunai"){
-                  echo "                              
-                  <th>Total</th>
-                  <td align='right'>".mata_uang($t_debit[$id])."</td>
-                  <td></td>                              
-                  <td align='right'>".mata_uang($t_saldo[$id])."</td>
+                  echo "                                                            
+                  <td align='right'></td>
+                  <td align='right'></td>                                                      
+                  <td align='right'></td>
                   ";
                 }
             
@@ -365,7 +396,7 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
             ";
             ?>
           
-        </tfoot>
+        </tfoot>                    
       </table>                                   
         
     <?php }elseif($set=="filter"){ ?>
@@ -409,7 +440,8 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                   <table id="example" class="table table-bordered" style="width:100%">
                     <thead>
                       <tr>
-                        <?php                         
+                        <?php     
+                        $dana_tunai = 0;                    
                         $kemarin = manipulasiTanggal($tgl,-1);                        
                         $sql = $this->m_admin->getByID("md_jenis","status",1);
                         foreach ($sql->result() as $isi) {
@@ -430,7 +462,7 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                             ";
                           }elseif($isi->jenis=="Dana Tunai"){
                             echo "
-                            <td bgcolor='yellow' align='center' valign='middle' colspan='4' rowspan='4'><font size='18px'>$isi->jenis</font></th>                            
+                            <td bgcolor='yellow' align='center' valign='middle' colspan='3' rowspan='4'><font size='18px'>$isi->jenis</font></th>                            
                             ";
                           }else{
                             echo "
@@ -489,6 +521,7 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                       </tr>
                       <tr>
                         <?php 
+                        $dana_tunai = 0;
                         foreach ($sql->result() as $isi) {
                           $cek_tgl = date('d', strtotime($tgl)); 
 
@@ -505,12 +538,14 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                           $sum_piutang = $this->db->query("SELECT SUM(piutang) as jum From md_transaksi WHERE tanggal = '$tgl' AND id_jenis = '$isi->id_jenis'")->row()->jum;                          
                           if($isi->jenis=="Pospay"){
                             $tunai[$id] = $sum_admin + $sum_debit;
+                            $dana_tunai+=$tunai[$id];
                             echo "                          
                             <th>Tunai</th>
                             <th>".mata_uang($tunai[$id])."</th>
                             ";
                           }elseif($isi->jenis!='Dana Tunai'){                            
                             $tunai[$id] = $sum_admin + $sum_debit - $sum_piutang;                          
+                            $dana_tunai+=$tunai[$id];
                             echo "                          
                             <th colspan='2'>Tunai</th>
                             <th>".mata_uang($tunai[$id])."</th>
@@ -547,9 +582,9 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                             ";
                           }elseif($isi->jenis=="Dana Tunai"){
                             echo "
-                            <td width='3%'>No</td>
                             <td>Lain-lain</td>
                             <td>Tujuan</td>                            
+                            <td align='right'><b>".mata_uang($dana_tunai)."</b></td>                            
                             ";
                           }
                         }
@@ -593,11 +628,10 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                               <td align='right'>".mata_uang($saldo[$id])."</td>
                             ";
                           }else{
-                            echo "                          
+                            echo "                                                        
+                              <td align='right'></td>                                                                                          
                               <td></td>
-                              <td align='right'>".mata_uang($tunai_kemarin[$id])."</td>                                                                                          
-                              <td></td>
-                              <td align='right'>".mata_uang($saldo[$id])."</td>
+                              <td align='right'>".mata_uang($dana_tunai)."</td>
                             ";
                           }
                         }
@@ -607,7 +641,8 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                       $maks = ($cek_maks->num_rows() > 0) ? $cek_maks->row()->jum : 0 ;
                       for ($i=0; $i <= $maks; $i++) {                      
                         echo "
-                        <tr>";                                                 
+                        <tr>";   
+                          $kredit_dana_t=0;                                              
                           foreach ($sql->result() as $isi) {
                             $id = $isi->id_jenis;        
                             $cek_tgl = date('d', strtotime($tgl)); 
@@ -621,6 +656,9 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                             $admin2[$id] = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->admin2 : 0 ;  
                             $ket = ($cek_debet->num_rows() > 0) ? $cek_debet->row()->keterangan : "" ;                          
 
+                            $cek_dana = $this->db->query("SELECT * FROM md_transaksi INNER JOIN md_jenis ON md_transaksi.id_jenis = md_jenis.id_jenis 
+                                WHERE jenis = 'Dana Tunai' AND tanggal = '$tgl' ORDER BY id_transaksi ASC LIMIT $i,1");
+                            $kredit_dana = ($cek_dana->num_rows() > 0) ? $cek_dana->row()->kredit : 0 ;                            
 
                             $cek_kemarin = $this->db->get_where("md_transaksi",array("id_jenis"=>$isi->id_jenis,"tanggal"=>$kemarin));
                             if($cek_kemarin->num_rows() > 0){
@@ -640,13 +678,20 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                               $saldo[$id] = $saldo_awal[$id] - $tunai_kemarin[$id];
                               if($no==1) $saldo[$id] = ($saldo[$id] - $debit[$id]) + $kredit[$id];                              
                                 else $saldo[$id] = ($t_saldo[$id] - $debit[$id]) + $kredit[$id];                              
+                              $dana_tunai += $saldo[$id];
                             }else{
                               if($no==1) $saldo[$id] = ($saldo_awal[$id] - $debit[$id]) + $kredit[$id];
                                 else $saldo[$id] = ($t_saldo[$id] - $debit[$id]) + $kredit[$id];                              
+                              $dana_tunai += $saldo[$id];
                             }
 
                             if($no==1) $t_saldo[$id] += $saldo[$id];
-                              else $t_saldo[$id] = $saldo[$id];                            
+                              else $t_saldo[$id] = $saldo[$id];   
+
+                            if($no==1) $saldo_dana = $dana_tunai;
+                              else $saldo_dana += $kredit_dana;   
+                                       
+                            //$kredit_dana_t += $kredit_dana;                  
                           
                             if($isi->jenis!="Pospay" AND $isi->jenis!="Dana Tunai"){
                               echo "                              
@@ -669,10 +714,9 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                               ";
                             }elseif($isi->jenis=="Dana Tunai"){
                               echo "                              
-                              <td>$no</td>
-                              <td></td>
-                              <td></td>                              
-                              <td></td>                              
+                              <td align='right'>".mata_uang($kredit[$id])."</td>
+                              <td align='right'></td>
+                              <td align='right'>".mata_uang($saldo_dana)."</td>                                                                                      
                               ";
                             }
                             
@@ -691,9 +735,12 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                               $data['debit'] = $t_debit[$id] + $tunai_kemarin[$id];                            
                             }else{                               
                               $data['debit'] = $t_debit[$id];                            
-                            }                     
-                            
-                            $data['saldo'] = $t_saldo[$id];                            
+                            }
+                            if($isi->jenis=="Dana Tunai"){
+                              $data['saldo'] = $saldo_dana;                            
+                            }else{                                               
+                              $data['saldo'] = $t_saldo[$id];                            
+                            }
                             $data['kredit'] = $t_kredit[$id]; 
                             $data['admin1'] = $t_admin1[$id]; 
                             $data['admin2'] = $t_admin2[$id]; 
@@ -748,11 +795,10 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days',$bentuk="Y-m-d"){
                               <td align='right'>".mata_uang($t_saldo[$id])."</td>
                               ";
                             }elseif($isi->jenis=="Dana Tunai"){
-                              echo "                              
-                              <th>Total</th>
-                              <td align='right'>".mata_uang($t_debit[$id])."</td>
-                              <td></td>                              
-                              <td align='right'>".mata_uang($t_saldo[$id])."</td>
+                              echo "                                                            
+                              <td align='right'></td>
+                              <td align='right'></td>                                                      
+                              <td align='right'></td>
                               ";
                             }
                         

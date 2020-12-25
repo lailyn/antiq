@@ -54,10 +54,124 @@ function manipulasiTanggal($tgl,$jumlah=-1,$format='days'){
       </div>
     </div>      
     <div class="row">
-      <div class="col-12 grid-margin">
+      <div class="col-md-6 grid-margin">
         <div class="card">
-          <div class="card-body">
-            <h4 class="card-title">Transaksi Terbaru</h4>
-            
-          </div> 
+          <div class="card-body">            
+            <h4 class="card-title">Transaksi Tanggal <?php echo date("d F Y") ?></h4>
+            <div id="diagram2"></div>
+          </div>
+        </div>      
+      </div>
+      <div class="col-md-6 grid-margin">
+        <div class="card">
+          <div class="card-body">            
+            <h4 class="card-title">Transaksi Bulan <?php echo date("F Y") ?></h4>
+            <div id="diagram1"></div>
+          </div>
+        </div>      
+      </div>
+    </div>
+
+
+<base href="<?php echo base_url(); ?>" />
+<script src="assets/js_chart/jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="assets/js_chart/highcharts.js" type="text/javascript"></script>
+<script src="assets/js_chart/exporting.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    var chart1; // globally available
+    $(document).ready(function() {
+      chart1 = new Highcharts.Chart({
+       chart: {
+        renderTo: 'diagram2',
+        type: 'column'
+      },   
+      title: {
+        text: 'Jumlah Transaksi'
+      },
+      xAxis: {
+        categories: ['Tanggal']
+      },
+      yAxis: {
+        title: {
+         text: ''
+       }
+     },
+     series:             
+     [
+     <?php     
+     $g = date('Y-m-d');  
+     $h = date('Y-m');
+     $r = $h.'-01';
+    
+      $sql   = "SELECT md_jenis.jenis, COUNT(md_transaksi.id_transaksi) AS jumlah FROM md_transaksi
+      INNER JOIN md_jenis ON md_transaksi.id_jenis = md_jenis.id_jenis 
+      WHERE md_transaksi.tanggal BETWEEN '$r' AND '$g'
+      GROUP BY md_jenis.id_jenis ORDER BY md_jenis.jenis ASC";
+    
+    $cek = $this->db->query($sql);
+    foreach ($cek->result() as $r) {    
+      // $tg=substr($r->tgl,0,5);
+      // $tgl = str_replace("-", "/", $tg);
+      $jenis=$r->jenis;                    
+      $jumlah=$r->jumlah;                    
+      ?>
+      {
+        name: '<?php echo $jenis; ?>',
+        data: [<?php echo $jumlah; ?>]
+      },
+    <?php } ?>
+    ]
+  });
+    }); 
+  </script>  
+  <script type="text/javascript">
+    var chart1; // globally available
+    $(document).ready(function() {
+      chart1 = new Highcharts.Chart({
+       chart: {
+        renderTo: 'diagram1',
+        type: 'column'
+      },   
+      title: {
+        text: 'Nominal Transaksi'
+      },
+      xAxis: {
+        categories: ['Tanggal']
+      },
+      yAxis: {
+        title: {
+         text: ''
+       }
+     },
+     series:             
+     [
+     <?php     
+     $g = date('Y-m-d');  
+     $h = date('Y-m');
+     $r = $h.'-01';
+    
+      $sql   = "SELECT md_jenis.jenis, SUM(md_transaksi.kredit) AS kredit, SUM(md_transaksi.debit) AS debit FROM md_transaksi
+      INNER JOIN md_jenis ON md_transaksi.id_jenis = md_jenis.id_jenis 
+      WHERE LEFT(md_transaksi.tanggal,7) = '$h'
+      GROUP BY md_jenis.id_jenis ORDER BY md_jenis.jenis ASC";
+    
+    $cek = $this->db->query($sql);
+    foreach ($cek->result() as $r) {    
+      // $tg=substr($r->tgl,0,5);
+      // $tgl = str_replace("-", "/", $tg);
+      $jenis=$r->jenis;                    
+      $kredit=$r->kredit;
+      $debit=$r->debit;
+      //$cek = $this->db->query("SLEECT SUM(kredit) FROM ")                    
+      ?>
+      {
+        name: '<?php echo $jenis; ?>',
+        data: [<?php echo $debit; ?>,<?php echo $kredit; ?>]
+      },
+    <?php } ?>
+    ]
+  });
+    }); 
+  </script>                    
                         

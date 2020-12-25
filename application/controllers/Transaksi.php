@@ -142,11 +142,12 @@ class Transaksi extends CI_Controller {
 		$tabel		= $this->tables;		
 		$pk				= $this->pk;
 		$data['created_by'] = $this->session->userdata("id_user");
-		$data['id_jenis'] 	= $data2['id_jenis_simpan']		= $this->input->post('id_jenis');				
+		$data['id_jenis'] 	= $data2['id_jenis_simpan'] = $id_jenis		= $this->input->post('id_jenis');				
+		$jenis = $this->m_admin->getByID("md_jenis","id_jenis",$id_jenis)->row()->jenis;
 		$data['kode'] 			= $this->cari_id();
 		$data['keterangan'] 			= $this->input->post('keterangan');		
 		$bayar 			= $this->input->post('bayar');						
-		if($bayar=="kredit"){
+		if($bayar=="kredit" OR $jenis=="Dana Tunai"){
 			$data2['bayar_simpan'] = "kredit";
 			$data['kredit'] 			= $this->m_admin->ubah_rupiah($this->input->post("nominal"));
 			$data['admin2'] 			= $this->m_admin->ubah_rupiah($this->input->post("admin"));

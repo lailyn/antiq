@@ -1,3 +1,3 @@
 # medica
  
-Deadline 20 Desember 2020
+Deadline Desember 2020

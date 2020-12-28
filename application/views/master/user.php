@@ -77,7 +77,16 @@
                       <label class="col-sm-2 col-form-label">No HP</label>
                       <div class="col-sm-4">
                         <input type="text" <?php echo $read ?> value="<?php echo $tampil = ($row!='') ? $row->no_hp : "" ; ?>" name="no_hp" placeholder="No HP" class="form-control" />
-                      </div>                    
+                      </div>                       
+                      <label class="col-sm-2 col-form-label">Status</label>
+                      <div class="col-sm-4">
+                        <select class="form-control" name="status" <?php echo  $read2 ?>>                          
+                          <?php echo $tampil = ($row!='') ? $row->status : "" ; ?>                          
+                          <option <?php if($tampil==1) echo 'selected' ?> value="1">Aktif</option>
+                          <option <?php if($tampil==0) echo 'selected' ?> value="0">Tidak Aktif</option>
+                        </select>
+                      </div>
+                                     
                     </div> 
                     
 

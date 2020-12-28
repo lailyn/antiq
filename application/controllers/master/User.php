@@ -58,13 +58,17 @@ class User extends CI_Controller {
 		$no = $_POST['start'];
 		foreach ($list as $isi) {
 					
-			
+			if($isi->status==1){
+        $status = "<label class='badge badge-gradient-success'>aktif</label>";
+      }else{
+        $status = "";
+      }
 			
 			$no++;
 			$row = array();
 			$row[] = $no;
 			$row[] = "<a href='master/user/detail?id=$isi->id_user'>$isi->id_user</a>";
-			$row[] = $isi->nama_lengkap;
+			$row[] = $isi->nama_lengkap." ".$status;
 			$row[] = $isi->email;
 			$row[] = $isi->no_hp;
 			$row[] = "
@@ -125,6 +129,7 @@ class User extends CI_Controller {
 		$data['nama_lengkap'] 			= $this->input->post('nama_lengkap');						
 		$data['email'] 			= $this->input->post('email');				
 		$data['no_hp'] 			= $this->input->post('no_hp');				
+		$data['status'] 			= $this->input->post('status');				
 		$data['password'] 			= md5($this->input->post('password'));				
 		$data['created_at'] 			= $waktu;
 		
@@ -163,6 +168,7 @@ class User extends CI_Controller {
 		$data['email'] 			= $this->input->post('email');				
 		$data['no_hp'] 			= $this->input->post('no_hp');				
 		$password 			= $this->input->post('password');
+		$data['status'] 			= $this->input->post('status');				
 		if($password!=""){				
 			$data['password'] 			= md5($this->input->post('password'));				
 		}

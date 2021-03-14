@@ -21,6 +21,11 @@ class Adm1n extends CI_Controller {
 		$this->load->model('m_admin');		
 		//===== Load Library =====
 		$this->load->library('upload');
+
+		//$this->load->library('facebook', array('appId' => '<Your Facebook appId>', 'secret' => '<Generated Secret Key>'));
+
+		// Get user's login information
+		//$this->user = $this->facebook->getUser();
 	}
 	protected function template($data)
 	{
@@ -45,6 +50,20 @@ class Adm1n extends CI_Controller {
 			'border' => 0,
 			'expiration' => 7200
 		);
+
+		// if ($this->user) {
+		// 	$data['user_profile'] = $this->facebook->api('/me/');
+
+		// 	// Get logout url of facebook
+		// 	$data['logout_url'] = $this->facebook->getLogoutUrl(array('next' => base_url() . 'index.php/oauth_login/logout'));
+
+		// 	// Send data to profile page
+		// 	$this->load->view('profile', $data);
+		// 	} else {
+
+		// 	// Store users facebook login url
+		// 	$data['login_url'] = $this->facebook->getLoginUrl();			
+		// }
 
 		// create captcha image
 		$cap = create_captcha($config_captcha);
